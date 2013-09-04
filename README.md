@@ -4,7 +4,9 @@ Fanfiction-Data-Tools
 A suite of tools for collecting, organizing, and visually displaying data from fanfiction websites.
 
 Project created by Ben Wurth
+
 ben.wurth@gmail.com
+
 On Skype at benwurth
 
 
