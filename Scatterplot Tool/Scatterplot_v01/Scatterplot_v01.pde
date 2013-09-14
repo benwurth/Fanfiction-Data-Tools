@@ -62,12 +62,16 @@ void setup() {
 }
 
 void drawAxes() {
+    //Set the stroke settings
+    strokeWeight(2);
+    stroke(1);
+
     //Draw the X axis
     line(origin[0],origin[1],screenWidth-50,origin[1]);
     
     //Draw the Y axis
     line(origin[0],origin[1],origin[0],50);
-    
+
     //Draw the white coverup
     //The coverup is needed because some datapoints might bleed outside of the axis otherwise
     fill(255);
@@ -157,9 +161,6 @@ void draw() {
         dp[i].update();
     }
     //Change the stroke settings for the axis, then draw axis
-    //TODO: Move the stroke settings to the drawAxes function
-    strokeWeight(2);
-    stroke(1);
     drawAxes();
 }
 
