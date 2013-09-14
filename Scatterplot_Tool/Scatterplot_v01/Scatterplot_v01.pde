@@ -1,9 +1,9 @@
 //TODOs:
-//Make the scale easily switchable between linear and logarithmic
 //Add a scale to the axes
 //Use an image buffer to optomize drawing the datapoints
 //Use an image buffer to draw the data box after all the datapoints
 //Use wraparound text for the databox
+//Add a control panel
 
 //Import libraries to handle sql databases
 import de.bezier.data.sql.*;
