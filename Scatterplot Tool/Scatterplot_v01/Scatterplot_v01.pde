@@ -16,6 +16,9 @@ DataPoint[] dp;
 //Create a Pfont object so we can use fonts later on
 PFont f;
 
+//Set whether to use a linear scale or logarithmic
+boolean useLogScale = false;
+
 //Screen Variables
 int screenWidth = 1000;
 int screenHeight = 700;
@@ -190,16 +193,29 @@ class DataPoint {
     
     //Sets the x position of the datapoint
     void findX() {
-//        xPos = origin[0]+log(words)/log(maxWords)*xScale;
-//        xPos = origin[0]+words/maxWords*xScale;
-        xPos = origin[0]+(log(words)/log(10)) / (log(maxWords)/log(10))*xScale;
+        if (useLogScale){
+            xPos = origin[0]+(log(words)/log(10)) / (log(maxWords)/log(10))*xScale;
+            //This log scale uses log base 10
+        }
+        else {
+            xPos = origin[0]+words/maxWords*xScale;
+        }
+        //xPos = origin[0]+log(words)/log(maxWords)*xScale;
+        //This log scale uses a natural log
     }
     
     //Sets the y position of the datapoint
     void findY() {
-//        yPos = origin[1]-log(views)/log(maxViews)*yScale;
-//        yPos = origin[1]-views/maxViews*yScale;
-        yPos = origin[1]-(log(views)/log(10)) / (log(maxViews)/log(10))*yScale;
+        if (useLogScale){
+            yPos = origin[1]-(log(views)/log(10)) / (log(maxViews)/log(10))*yScale;
+        }
+        else {
+            yPos = origin[1]-views/maxViews*yScale;
+            //This log scale uses log base 10
+        }
+        //yPos = origin[1]-log(views)/log(maxViews)*yScale;
+        //This log scale uses a natural log
+        
     }
     
     //Sets the diameter of the datapoint
