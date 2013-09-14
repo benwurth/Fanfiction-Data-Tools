@@ -13,6 +13,8 @@ filename = askopenfilename() #Show an Open Dialog
 #Initialize wordcount to be a dictionary
 wordcount = dict()
 
+#TODO: Add the 100 most common english words to a list and omit them from the word counts (If a flag is used)
+
 #Open the file
 fp = open(filename)
 #Loop through the lines one by one (so that it doesn't hog memory)
