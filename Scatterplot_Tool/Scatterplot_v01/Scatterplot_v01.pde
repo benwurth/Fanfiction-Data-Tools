@@ -15,6 +15,11 @@ MySQL mysql;
 DataPoint[] dp;
 //Create a Pfont object so we can use fonts later on
 PFont f;
+//Create a PGraphics object to buffer the drawing of the datapoints
+PGraphics dpb;
+PGraphics overlay;
+PImage img;
+boolean useOverlay = false;
 
 //Set whether to use a linear scale or logarithmic
 boolean useLogScale = false;
@@ -28,6 +33,9 @@ int xScale = 900;
 int yScale = 600;
 //sizeScale determines the max size of the datapoints. It is measured in the diameter of the points
 int sizeScale = 10;
+//Create margins for the axis
+int xMargin = 50;
+int yMargin = 50;
 //Initialize variables to hold various maximum values. We will get these values from the database
 int maxWords;
 int maxViews;
@@ -36,10 +44,14 @@ int maxLikes;
 
 //Axis Variables
 //Stores the position of the origin
-int[] origin = {50,screenHeight - 50};
+int[] origin = {xMargin,screenHeight - yMargin};
 
 void setup() {
-    size(screenWidth,screenHeight);
+    size(screenWidth,screenHeight,P3D);
+    frameRate(30);
+    //Initialize the datapoint buffer
+    dpb = createGraphics(screenWidth, screenHeight, P3D);
+    overlay = createGraphics(screenWidth, screenHeight, P3D);
     //Creates the font used for the data box
     f = createFont("Courier", 14, true);
    
@@ -162,11 +174,24 @@ void drawDataBox(String t, String a, float w, float v, float l) {
 
 void draw() {
     //Draw the background again to reset the stage
-    background(255);
     //Update all the data points
+    dpb.beginDraw();
+    dpb.background(255,255,255);
     for (int i = 0; i < maxKey; i++) {
         dp[i].update();
     }
+    dpb.endDraw();
+    
+    //img = dpb.get(0, 0, dpb.width, dpb.height);
+    //image(img, 0, 0);
+    
+    
+    background(255);
+    
+    image(dpb, 0,0);
+    
+    frame.setTitle(int(frameRate) + " fps");
+    
     //Change the stroke settings for the axis, then draw axis
     drawAxes();
 }
@@ -230,36 +255,38 @@ class DataPoint {
     void findColor() {
         switch(contentRating) {
             case 0:
-                fill(0,255,0);
+                dpb.fill(0,255,0);
                 break;
             case 1:
-                fill(0,0,255);
+                dpb.fill(0,0,255);
                 break;
             case 2:
-                fill(255,0,0);
+                dpb.fill(255,0,0);
                 break;
         }
     }
     
     //Draws the datapoint
     void update() {
-        ellipseMode(RADIUS);
+        //dpb.beginDraw();
+        dpb.ellipseMode(RADIUS);
         //Gets the distance from the mouse to the datapoint
         distance = dist(mouseX,mouseY,xPos,yPos);
         if (distance < size) {                                  //If the mouse is directly over the datapoint:
             size = baseSize + 3;                                //Make it bigger
-            drawDataBox(title, author, words, views, likes);    //Draw a databox with the datapoint's information
+            //drawDataBox(title, author, words, views, likes);    //Draw a databox with the datapoint's information
             findColor();                                        //Set the fill color based on the datapoint's content rating
-            stroke(100);                                        //Give the datapoint a black highlight
-            strokeWeight(1);
+            dpb.stroke(100);                                        //Give the datapoint a black highlight
+            dpb.strokeWeight(1);
         }
         else {                                                  //Else just:
             findColor();                                        //Find the color
-            noStroke();                                         //Don't give it a stroke
+            dpb.noStroke();                                         //Don't give it a stroke
             findX();                                            //Find the x position
             findY();                                            //Find the y position
             findSize();                                         //Find the datapoint's size
         }
-        ellipse(xPos,yPos,size,size);                           //Draw the datapoint
+        dpb.ellipse(xPos,yPos,size,size);                       //Draw the datapoint
+        //dpb.endDraw();
     }
 }
