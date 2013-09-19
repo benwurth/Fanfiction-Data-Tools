@@ -1,7 +1,5 @@
 //TODOs:
 //Add a scale to the axes
-//Use an image buffer to optomize drawing the datapoints
-//Use an image buffer to draw the data box after all the datapoints
 //Use wraparound text for the databox
 //Add a control panel
 
@@ -17,6 +15,8 @@ DataPoint[] dp;
 PFont f;
 //Create a PGraphics object to buffer the drawing of the datapoints
 PGraphics dpb;
+//Determines whether to redraw the datapoints
+boolean reDraw = true;
 //Create a PGraphics object to overlay the selected dot and data box
 PGraphics overlay;
 PImage img;
@@ -184,19 +184,29 @@ void drawOverlay(int k) {
 
 void draw() {
     //Draw the background again to reset the stage
-    //Update all the data points
-    dpb.beginDraw();
-    dpb.background(255,255,255);
-    for (int i = 0; i < maxKey; i++) {
-        dp[i].update();
-    }
-    dpb.endDraw();
-       
     background(255);
+    //Update all the data points
+    if (reDraw){
+        dpb.beginDraw();
+        dpb.background(255,255,255);
+        for (int i = 0; i < maxKey; i++) {
+            dp[i].update();
+        }
+        dpb.endDraw();
+        image(dpb, 0,0);
+        reDraw = false;  
+    }
+    else {
+        image(dpb, 0, 0);
+    }
     //Draw the buffered image
-    image(dpb, 0,0);
+    //image(dpb, 0,0);
     //Set the frame rate as the title of the sketch
     frame.setTitle(int(frameRate) + " fps");
+
+    for (int i = 0; i<maxKey; i++){
+        dp[i].checkDistance();
+    }
 
     if (useOverlay) {
         drawOverlay(overlayKey);
@@ -298,6 +308,29 @@ class DataPoint {
     void update() {
         //dpb.beginDraw();
         dpb.ellipseMode(RADIUS);
+        dpFindColor();                                        //Find the color
+        dpb.noStroke();                                     //Don't give it a stroke
+        findX();                                            //Find the x position
+        findY();                                            //Find the y position
+        findSize();
+        dpb.ellipse(xPos,yPos,dpSize,dpSize);                   //Draw the datapoint
+        //dpb.endDraw();
+    }
+
+    void updateOverlay() {
+        println("Datapoint: "+pointKey);
+        overlay.ellipseMode(RADIUS);
+        overlayFindColor();
+        findSize();
+        dpSize = baseSize + 3;
+        overlay.stroke(100);
+        overlay.strokeWeight(1);
+        overlay.background(0,0);
+        overlay.ellipse(xPos, yPos, dpSize, dpSize);
+        drawDataBox(title, author, words, views, likes);
+    }
+
+    void checkDistance() {
         //Gets the distance from the mouse to the datapoint
         distance = dist(mouseX,mouseY,xPos,yPos);
         if (distance < dpSize) {                                  //If the mouse is directly over the datapoint:
@@ -316,26 +349,5 @@ class DataPoint {
             // findY();                                            //Find the y position
             // findSize();                                         //Find the datapoint's dpSize
         }
-
-        dpFindColor();                                        //Find the color
-        dpb.noStroke();                                     //Don't give it a stroke
-        findX();                                            //Find the x position
-        findY();                                            //Find the y position
-        findSize();
-        dpb.ellipse(xPos,yPos,dpSize,dpSize);                   //Draw the datapoint
-        //dpb.endDraw();
-    }
-
-    void updateOverlay() {
-        //println("Datapoint: "+pointKey);
-        overlay.ellipseMode(RADIUS);
-        overlayFindColor();
-        findSize();
-        dpSize = baseSize + 3;
-        overlay.stroke(100);
-        overlay.strokeWeight(1);
-        overlay.background(0,0);
-        overlay.ellipse(xPos, yPos, dpSize, dpSize);
-        drawDataBox(title, author, words, views, likes);
     }
 }
