@@ -1,6 +1,5 @@
 //TODOs:
 //Add a scale to the axes
-//Use wraparound text for the databox
 //Add a control panel
 
 //Import libraries to handle sql databases
@@ -26,7 +25,7 @@ boolean useOverlay = false;
 int overlayKey = 0;
 
 //Set whether to use a linear scale or logarithmic
-boolean useLogScale = false;
+boolean useLogScale = true;
 
 //Screen Variables
 int screenWidth = 1000;
@@ -153,6 +152,7 @@ int getMaxKey() {
 void drawDataBox(String t, String a, float w, float v, float l) {
     //Prepares to create the data box by setting the fill color, 
     //the stroke color, and the stroke width
+    String boxText = "";
     overlay.fill(255,255,204);
     overlay.stroke(0);
     overlay.strokeWeight(1);
@@ -169,11 +169,13 @@ void drawDataBox(String t, String a, float w, float v, float l) {
     //Sets the font color
     overlay.fill(0);
     //Draws the text
-    overlay.text("Title: "+t, textX,textY);
-    overlay.text("Author: "+a, textX, textY + 20);
-    overlay.text("Words: "+(int)w, textX, textY + 40);
-    overlay.text("Views: "+(int)v, textX, textY + 60);
-    overlay.text("Likes: "+(int)l, textX, textY + 80);
+    boxText = "Title: "+t+"\nAuthor: "+a+"\nWords: "+w+"\nViews: "+v+"\nLikes: "+l;
+    overlay.text(boxText, textX, textY, 380, 200);
+    // overlay.text("Title: "+t, textX,textY);
+    // overlay.text("Author: "+a, textX, textY + 20);
+    // overlay.text("Words: "+(int)w, textX, textY + 40);
+    // overlay.text("Views: "+(int)v, textX, textY + 60);
+    // overlay.text("Likes: "+(int)l, textX, textY + 80);
 }
 
 void drawOverlay(int k) {
