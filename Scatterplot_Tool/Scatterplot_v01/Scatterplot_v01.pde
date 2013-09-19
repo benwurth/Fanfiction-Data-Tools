@@ -17,9 +17,13 @@ DataPoint[] dp;
 PFont f;
 //Create a PGraphics object to buffer the drawing of the datapoints
 PGraphics dpb;
+//Create a PGraphics object to overlay the selected dot and data box
 PGraphics overlay;
 PImage img;
+//Create a boolean to determine whether to use the overlay. 
 boolean useOverlay = false;
+//The overlayKey is to set which datapoint is to be displayed
+int overlayKey = 0;
 
 //Set whether to use a linear scale or logarithmic
 boolean useLogScale = false;
@@ -31,8 +35,8 @@ int screenHeight = 700;
 int xScale = 900;
 //yScale is the length of the y axis in pixels
 int yScale = 600;
-//sizeScale determines the max size of the datapoints. It is measured in the diameter of the points
-int sizeScale = 10;
+//dpSizeScale determines the max dpSize of the datapoints. It is measured in the diameter of the points
+int dpSizeScale = 10;
 //Create margins for the axis
 int xMargin = 50;
 int yMargin = 50;
@@ -76,7 +80,7 @@ void setup() {
     //Puts the data recieved from the mysql query into datapoint objects
     for (int i = 0; i < maxKey; i++) {
         mysql.next();
-        dp[i] = new DataPoint(mysql.getInt("Prime_Key"), mysql.getFloat("Words"), mysql.getFloat("Views"), mysql.getFloat("Likes"), mysql.getInt("Content_Rating"), mysql.getString("Title"),mysql.getString("Author_Name"));
+        dp[i] = new DataPoint(mysql.getInt("Prime_Key"), mysql.getFloat("Words"), mysql.getFloat("Views"), mysql.getFloat("Likes"), mysql.getInt("Content_Rating"), mysql.getString("Title"),mysql.getString("Author_Name"), i);
     }
 }
 
@@ -149,9 +153,9 @@ int getMaxKey() {
 void drawDataBox(String t, String a, float w, float v, float l) {
     //Prepares to create the data box by setting the fill color, 
     //the stroke color, and the stroke width
-    fill(255,255,204);
-    stroke(0);
-    strokeWeight(1);
+    overlay.fill(255,255,204);
+    overlay.stroke(0);
+    overlay.strokeWeight(1);
     //Sets the draw position of the box
     int xPos = screenWidth - 500;
     int yPos = 100;
@@ -159,17 +163,23 @@ void drawDataBox(String t, String a, float w, float v, float l) {
     int textX = xPos+10;
     int textY = yPos+20;
     //Draws the box
-    rect(xPos,yPos,400,200);
+    overlay.rect(xPos,yPos,400,200);
     //Sets the font
-    textFont(f);
+    overlay.textFont(f);
     //Sets the font color
-    fill(0);
+    overlay.fill(0);
     //Draws the text
-    text("Title: "+t, textX,textY);
-    text("Author: "+a, textX, textY + 20);
-    text("Words: "+(int)w, textX, textY + 40);
-    text("Views: "+(int)v, textX, textY + 60);
-    text("Likes: "+(int)l, textX, textY + 80);
+    overlay.text("Title: "+t, textX,textY);
+    overlay.text("Author: "+a, textX, textY + 20);
+    overlay.text("Words: "+(int)w, textX, textY + 40);
+    overlay.text("Views: "+(int)v, textX, textY + 60);
+    overlay.text("Likes: "+(int)l, textX, textY + 80);
+}
+
+void drawOverlay(int k) {
+    overlay.beginDraw();
+    dp[k].updateOverlay();
+    overlay.endDraw();
 }
 
 void draw() {
@@ -181,16 +191,18 @@ void draw() {
         dp[i].update();
     }
     dpb.endDraw();
-    
-    //img = dpb.get(0, 0, dpb.width, dpb.height);
-    //image(img, 0, 0);
-    
-    
+       
     background(255);
-    
+    //Draw the buffered image
     image(dpb, 0,0);
-    
+    //Set the frame rate as the title of the sketch
     frame.setTitle(int(frameRate) + " fps");
+
+    if (useOverlay) {
+        drawOverlay(overlayKey);
+        useOverlay = false;
+        image(overlay,0,0);
+    }
     
     //Change the stroke settings for the axis, then draw axis
     drawAxes();
@@ -199,14 +211,14 @@ void draw() {
 //Class for the data point object
 class DataPoint {
     //Initialize variables
-    float xPos, yPos, size, baseSize, words, views, likes, distance;
-    int contentRating, primeKey;
+    float xPos, yPos, dpSize, baseSize, words, views, likes, distance;
+    int contentRating, primeKey, pointKey;
     String title, author;
     
     //Constructor
     //Takes variables for the database key, word count, view count, like count, content rating,
     //title, and author
-    DataPoint (int prime, float w, float v, float l, int cr, String t, String a) {
+    DataPoint (int prime, float w, float v, float l, int cr, String t, String a, int k) {
         primeKey = prime;
         words = w;
         views = v;
@@ -214,6 +226,8 @@ class DataPoint {
         contentRating = cr;
         title = t;
         author = a;
+        pointKey = k;
+        findSize();
     }
     
     //Sets the x position of the datapoint
@@ -245,14 +259,14 @@ class DataPoint {
     
     //Sets the diameter of the datapoint
     void findSize() {
-        size = likes/maxLikes*sizeScale+1;
-//        size = 4;
-//        size = (log(likes)/log(maxLikes)*sizeScale)+1;
-        baseSize = size;
+        dpSize = likes/maxLikes*dpSizeScale+1;
+//        dpSize = 4;
+//        dpSize = (log(likes)/log(maxLikes)*dpSizeScale)+1;
+        baseSize = dpSize;
     }
     
     //Sets the color of the datapoint based on the content rating of the entry
-    void findColor() {
+    void dpFindColor() {
         switch(contentRating) {
             case 0:
                 dpb.fill(0,255,0);
@@ -266,27 +280,62 @@ class DataPoint {
         }
     }
     
+    void overlayFindColor() {
+        switch(contentRating) {
+            case 0:
+                overlay.fill(0,255,0);
+                break;
+            case 1:
+                overlay.fill(0,0,255);
+                break;
+            case 2:
+                overlay.fill(255,0,0);
+                break;
+        }
+    }
+
     //Draws the datapoint
     void update() {
         //dpb.beginDraw();
         dpb.ellipseMode(RADIUS);
         //Gets the distance from the mouse to the datapoint
         distance = dist(mouseX,mouseY,xPos,yPos);
-        if (distance < size) {                                  //If the mouse is directly over the datapoint:
-            size = baseSize + 3;                                //Make it bigger
-            //drawDataBox(title, author, words, views, likes);    //Draw a databox with the datapoint's information
-            findColor();                                        //Set the fill color based on the datapoint's content rating
-            dpb.stroke(100);                                        //Give the datapoint a black highlight
-            dpb.strokeWeight(1);
+        if (distance < dpSize) {                                  //If the mouse is directly over the datapoint:
+            useOverlay = true;
+            overlayKey = pointKey;
+            // dpSize = baseSize + 3;                                //Make it bigger
+            // //drawDataBox(title, author, words, views, likes);    //Draw a databox with the datapoint's information
+            // dpFindColor();                                        //Set the fill color based on the datapoint's content rating
+            // dpb.stroke(100);                                        //Give the datapoint a black highlight
+            // dpb.strokeWeight(1);
         }
         else {                                                  //Else just:
-            findColor();                                        //Find the color
-            dpb.noStroke();                                         //Don't give it a stroke
-            findX();                                            //Find the x position
-            findY();                                            //Find the y position
-            findSize();                                         //Find the datapoint's size
+            // dpFindColor();                                        //Find the color
+            // dpb.noStroke();                                         //Don't give it a stroke
+            // findX();                                            //Find the x position
+            // findY();                                            //Find the y position
+            // findSize();                                         //Find the datapoint's dpSize
         }
-        dpb.ellipse(xPos,yPos,size,size);                       //Draw the datapoint
+
+        dpFindColor();                                        //Find the color
+        dpb.noStroke();                                     //Don't give it a stroke
+        findX();                                            //Find the x position
+        findY();                                            //Find the y position
+        findSize();
+        dpb.ellipse(xPos,yPos,dpSize,dpSize);                   //Draw the datapoint
         //dpb.endDraw();
+    }
+
+    void updateOverlay() {
+        //println("Datapoint: "+pointKey);
+        overlay.ellipseMode(RADIUS);
+        overlayFindColor();
+        findSize();
+        dpSize = baseSize + 3;
+        overlay.stroke(100);
+        overlay.strokeWeight(1);
+        overlay.background(0,0);
+        overlay.ellipse(xPos, yPos, dpSize, dpSize);
+        drawDataBox(title, author, words, views, likes);
     }
 }
