@@ -10,8 +10,9 @@ import de.bezier.data.sql.mapper.*;
 MySQL mysql;
 //Create an array of DataPoint objects
 DataPoint[] dp;
-//Create a Pfont object so we can use fonts later on
-PFont f;
+//Create Pfont objects so we can use fonts later on
+PFont dataBoxFont;
+PFont axisValueFont;
 //Create a PGraphics object to buffer the drawing of the datapoints
 PGraphics dpb;
 //Determines whether to redraw the datapoints
@@ -60,7 +61,8 @@ void setup() {
     dpb = createGraphics(screenWidth, screenHeight, P3D);
     overlay = createGraphics(screenWidth, screenHeight, P3D);
     //Creates the font used for the data box
-    f = createFont("Courier", 14, true);
+    dataBoxFont = createFont("Courier", 14, true);
+    axisValueFont = createFont("Courier", 10, false);
    
     //Sets the username and password for the mysql database
     String user = "fimfic";
@@ -108,9 +110,22 @@ void drawAxes() {
     //Draw the ticks
     strokeWeight(2);
     stroke(1);
+    fill(0);
+    textAlign(CENTER);
+    String tickVal;
+    float stringWidth;
+    int xPosition;
+    int yPosition;
     //X axis
     for (int i = 0; i<=screenWidth - 50 - origin[0]; i += (screenWidth - 50 - origin[0]) / (xTicks-1)){
-        line(origin[0] + i, origin[1], origin[0] + i, origin[1] + tickLength);
+        xPosition = origin[0] + i;
+        yPosition = origin[1];
+        line(xPosition, yPosition, xPosition, yPosition + tickLength);
+        //tickVal = String.valueOf((int)getTickValue(xPosition, true));
+        tickVal = nfc((int)getTickValue(xPosition,true));
+        // tickVal = getTickValue((float)origin[0] + i, true);
+        stringWidth = textWidth(tickVal);
+        text(tickVal, xPosition, yPosition + tickLength + 15);;
     }
     //Y axis
     for (int i = 0; i<=screenHeight - 50 - yMargin; i += (screenHeight - 50 - yMargin) / (yTicks-1)){
@@ -125,7 +140,7 @@ int getMaxWords() {
         return mysql.getInt(1);
 }
 
-int getTickValue(int position, boolean isX) {
+float getTickValue(float position, boolean isX) {
     if (isX){
         return position/screenWidth*maxWords;
     }
@@ -190,11 +205,12 @@ void drawDataBox(String t, String a, float w, float v, float l) {
     //Draws the box
     overlay.rect(xPos,yPos,400,200);
     //Sets the font
-    overlay.textFont(f);
+    overlay.textAlign(LEFT);
+    overlay.textFont(dataBoxFont);
     //Sets the font color
     overlay.fill(0);
     //Draws the text
-    boxText = "Title: "+t+"\nAuthor: "+a+"\nWords: "+w+"\nViews: "+v+"\nLikes: "+l;
+    boxText = "Title: "+t+"\nAuthor: "+a+"\nWords: "+(int)w+"\nViews: "+(int)v+"\nLikes: "+(int)l;
     overlay.text(boxText, textX, textY, 380, 200);
     // overlay.text("Title: "+t, textX,textY);
     // overlay.text("Author: "+a, textX, textY + 20);
@@ -235,14 +251,16 @@ void draw() {
         dp[i].checkDistance();
     }
 
+//Change the stroke settings for the axis, then draw axis
+    drawAxes();
+
     if (useOverlay) {
         drawOverlay(overlayKey);
         useOverlay = false;
         image(overlay,0,0);
     }
     
-    //Change the stroke settings for the axis, then draw axis
-    drawAxes();
+    
 }
 
 //Class for the data point object
