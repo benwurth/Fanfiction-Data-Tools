@@ -128,8 +128,14 @@ void drawAxes() {
         text(tickVal, xPosition, yPosition + tickLength + 15);;
     }
     //Y axis
+    textAlign(RIGHT);
     for (int i = 0; i<=screenHeight - 50 - yMargin; i += (screenHeight - 50 - yMargin) / (yTicks-1)){
-        line(origin[0], origin[1] - i, origin[0] - tickLength, origin[1] - i);
+        xPosition = origin[0];
+        yPosition = origin[1] - i;
+        line(xPosition, yPosition, xPosition - tickLength, yPosition);
+        tickVal = nfc((int)getTickValue(yPosition, false));
+        stringWidth = textWidth(tickVal);
+        text(tickVal, xPosition - tickLength - 5, yPosition + 4);
     }
 }
 
@@ -251,7 +257,7 @@ void draw() {
         dp[i].checkDistance();
     }
 
-//Change the stroke settings for the axis, then draw axis
+    //Change the stroke settings for the axis, then draw axis
     drawAxes();
 
     if (useOverlay) {
