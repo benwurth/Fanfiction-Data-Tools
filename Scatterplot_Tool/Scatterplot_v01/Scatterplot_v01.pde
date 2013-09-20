@@ -121,9 +121,7 @@ void drawAxes() {
         xPosition = origin[0] + i;
         yPosition = origin[1];
         line(xPosition, yPosition, xPosition, yPosition + tickLength);
-        //tickVal = String.valueOf((int)getTickValue(xPosition, true));
         tickVal = nfc((int)getTickValue(xPosition,true));
-        // tickVal = getTickValue((float)origin[0] + i, true);
         stringWidth = textWidth(tickVal);
         text(tickVal, xPosition, yPosition + tickLength + 15);;
     }
@@ -146,6 +144,7 @@ int getMaxWords() {
         return mysql.getInt(1);
 }
 
+//Get the values that ticks are supposed to display
 float getTickValue(float position, boolean isX) {
     if (isX){
         return position/screenWidth*maxWords;
@@ -218,11 +217,6 @@ void drawDataBox(String t, String a, float w, float v, float l) {
     //Draws the text
     boxText = "Title: "+t+"\nAuthor: "+a+"\nWords: "+(int)w+"\nViews: "+(int)v+"\nLikes: "+(int)l;
     overlay.text(boxText, textX, textY, 380, 200);
-    // overlay.text("Title: "+t, textX,textY);
-    // overlay.text("Author: "+a, textX, textY + 20);
-    // overlay.text("Words: "+(int)w, textX, textY + 40);
-    // overlay.text("Views: "+(int)v, textX, textY + 60);
-    // overlay.text("Likes: "+(int)l, textX, textY + 80);
 }
 
 void drawOverlay(int k) {
@@ -248,8 +242,6 @@ void draw() {
     else {
         image(dpb, 0, 0);
     }
-    //Draw the buffered image
-    //image(dpb, 0,0);
     //Set the frame rate as the title of the sketch
     frame.setTitle(int(frameRate) + " fps");
 
@@ -300,8 +292,6 @@ class DataPoint {
         else {
             xPos = origin[0]+words/maxWords*xScale;
         }
-        //xPos = origin[0]+log(words)/log(maxWords)*xScale;
-        //This log scale uses a natural log
     }
     
     //Sets the y position of the datapoint
@@ -313,16 +303,11 @@ class DataPoint {
             yPos = origin[1]-views/maxViews*yScale;
             //This log scale uses log base 10
         }
-        //yPos = origin[1]-log(views)/log(maxViews)*yScale;
-        //This log scale uses a natural log
-        
     }
     
     //Sets the diameter of the datapoint
     void findSize() {
         dpSize = likes/maxLikes*dpSizeScale+1;
-//        dpSize = 4;
-//        dpSize = (log(likes)/log(maxLikes)*dpSizeScale)+1;
         baseSize = dpSize;
     }
     
@@ -357,15 +342,13 @@ class DataPoint {
 
     //Draws the datapoint
     void update() {
-        //dpb.beginDraw();
         dpb.ellipseMode(RADIUS);
-        dpFindColor();                                        //Find the color
+        dpFindColor();                                      //Find the color
         dpb.noStroke();                                     //Don't give it a stroke
         findX();                                            //Find the x position
         findY();                                            //Find the y position
         findSize();
-        dpb.ellipse(xPos,yPos,dpSize,dpSize);                   //Draw the datapoint
-        //dpb.endDraw();
+        dpb.ellipse(xPos,yPos,dpSize,dpSize);               //Draw the datapoint
     }
 
     void updateOverlay() {
@@ -386,18 +369,6 @@ class DataPoint {
         if (distance < dpSize) {                                  //If the mouse is directly over the datapoint:
             useOverlay = true;
             overlayKey = pointKey;
-            // dpSize = baseSize + 3;                                //Make it bigger
-            // //drawDataBox(title, author, words, views, likes);    //Draw a databox with the datapoint's information
-            // dpFindColor();                                        //Set the fill color based on the datapoint's content rating
-            // dpb.stroke(100);                                        //Give the datapoint a black highlight
-            // dpb.strokeWeight(1);
-        }
-        else {                                                  //Else just:
-            // dpFindColor();                                        //Find the color
-            // dpb.noStroke();                                         //Don't give it a stroke
-            // findX();                                            //Find the x position
-            // findY();                                            //Find the y position
-            // findSize();                                         //Find the datapoint's dpSize
         }
     }
 }
