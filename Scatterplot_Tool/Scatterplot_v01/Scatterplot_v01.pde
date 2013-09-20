@@ -320,7 +320,6 @@ class DataPoint {
     }
 
     void updateOverlay() {
-        println("Datapoint: "+pointKey);
         overlay.ellipseMode(RADIUS);
         overlayFindColor();
         findSize();
