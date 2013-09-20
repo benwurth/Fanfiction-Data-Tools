@@ -25,7 +25,7 @@ boolean useOverlay = false;
 int overlayKey = 0;
 
 //Set whether to use a linear scale or logarithmic
-boolean useLogScale = true;
+boolean useLogScale = false;
 
 //Screen Variables
 int screenWidth = 1000;
@@ -39,6 +39,10 @@ int dpSizeScale = 10;
 //Create margins for the axis
 int xMargin = 50;
 int yMargin = 50;
+//Number of tick for each axis
+int xTicks = 10;
+int yTicks = 10;
+int tickLength = 10;
 //Initialize variables to hold various maximum values. We will get these values from the database
 int maxWords;
 int maxViews;
@@ -100,6 +104,18 @@ void drawAxes() {
     noStroke();
     rect(0,0,50,screenHeight);
     rect(0,origin[1]+1,screenWidth,50);
+
+    //Draw the ticks
+    strokeWeight(2);
+    stroke(1);
+    //X axis
+    for (int i = 0; i<=screenWidth - 50 - origin[0]; i += (screenWidth - 50 - origin[0]) / (xTicks-1)){
+        line(origin[0] + i, origin[1], origin[0] + i, origin[1] + tickLength);
+    }
+    //Y axis
+    for (int i = 0; i<=screenHeight - 50 - yMargin; i += (screenHeight - 50 - yMargin) / (yTicks-1)){
+        line(origin[0], origin[1] - i, origin[0] - tickLength, origin[1] - i);
+    }
 }
 
 //Get the number of words in the entry with the most words. Used to normalize values
@@ -107,6 +123,15 @@ int getMaxWords() {
         mysql.query("SELECT MAX(Words) AS Words FROM Stories;");
         mysql.next();
         return mysql.getInt(1);
+}
+
+int getTickValue(int position, boolean isX) {
+    if (isX){
+        return position/screenWidth*maxWords;
+    }
+    else {
+        return position/screenHeight*maxViews;
+    }
 }
 
 //Get the maximum view value. Used to normalize values
