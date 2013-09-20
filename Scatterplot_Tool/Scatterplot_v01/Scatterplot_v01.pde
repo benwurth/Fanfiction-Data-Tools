@@ -1,5 +1,4 @@
 //TODOs:
-//Add a scale to the axes
 //Add a control panel
 
 //Import libraries to handle sql databases
@@ -31,15 +30,13 @@ boolean useLogScale = false;
 //Screen Variables
 int screenWidth = 1000;
 int screenHeight = 700;
-//xScale is the length of the x axis in pixels
-int xScale = 900;
-//yScale is the length of the y axis in pixels
-int yScale = 600;
 //dpSizeScale determines the max dpSize of the datapoints. It is measured in the diameter of the points
 int dpSizeScale = 10;
 //Create margins for the axis
-int xMargin = 50;
-int yMargin = 50;
+int leftMargin = 100;
+int rightMargin = 50;
+int topMargin = 50;
+int bottomMargin = 50;
 //Number of tick for each axis
 int xTicks = 10;
 int yTicks = 10;
@@ -52,7 +49,12 @@ int maxLikes;
 
 //Axis Variables
 //Stores the position of the origin
-int[] origin = {xMargin,screenHeight - yMargin};
+int[] origin = {leftMargin,screenHeight - bottomMargin};
+
+//xScale is the length of the x axis in pixels
+int xScale = screenWidth - origin[0] - 50;
+//yScale is the length of the y axis in pixels
+int yScale = 600;
 
 void setup() {
     size(screenWidth,screenHeight,P3D);
@@ -127,7 +129,7 @@ void drawAxes() {
     }
     //Y axis
     textAlign(RIGHT);
-    for (int i = 0; i<=screenHeight - 50 - yMargin; i += (screenHeight - 50 - yMargin) / (yTicks-1)){
+    for (int i = 0; i<=screenHeight - 50 - bottomMargin; i += (screenHeight - 50 - bottomMargin) / (yTicks-1)){
         xPosition = origin[0];
         yPosition = origin[1] - i;
         line(xPosition, yPosition, xPosition - tickLength, yPosition);
