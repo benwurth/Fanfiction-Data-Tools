@@ -1,6 +1,5 @@
 Fanfiction-Data-Tools
 =====================
-
 A suite of tools for collecting, organizing, and visually displaying data from fanfiction websites.
 
 Project created by Ben Wurth  
@@ -10,7 +9,6 @@ On Skype at benwurth
 
 Documentation
 -------------
-
 Not a lot of documentation so far. You can find out what most tools do by either looking at the comments in the code or by looking at their entries in the Wiki on GitHub.
 
 
@@ -36,3 +34,22 @@ You can change the directory in the console by using `setwd(...)`.
 After you've set the working directory, you can run the script by typing `source("wordcountToWordcloud.r");` Then enter the number of words you want in your wordcloud as an integer. R will then output a wordcloud. 
 
 Saving the wordcloud to an image file or PDF file is not currently supported, but it is planned to be implemented soon.
+
+TODO
+----
+
+###Scatterplot_v01.pde
+- [ ] Add a control panel
+- [ ] Add support to the axis for logarithmic scaling
+- [ ] Export the scatterplot image as a PDF
+- [ ] Add support for Unicode characters
+- [ ] Switch over from MySQL to CSV
+
+###Word_Counter.py
+- [ ] Add the option to filter out the 100 most-used words in the english language
+
+###wordCountToWordCloud.r
+- [ ] Export the wordcloud to PDF format
+
+###Miscellaneous
+- [ ] Move databaser.py to repo
